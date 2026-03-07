@@ -15,7 +15,9 @@ col1, col2 = st.columns(2)
 with col1:
     visa_type = st.selectbox("Visa Type", ['Student', 'Work', 'Tourist'])
     age = st.slider("Age", 18, 65, 25)
-    country_risk = st.selectbox("Country Risk", [1, 2, 3])
+    countries = ['India', 'USA', 'UK', 'Canada', 'Australia', 'Germany', 'China', 'Singapore']
+    country = st.selectbox('🇮🇳 Country:', countries)
+
 with col2:
     income = st.slider("Income (USD)", 10000, 100000, 30000)
     language = st.slider("IELTS Score", 4.0, 9.0, 6.5)
