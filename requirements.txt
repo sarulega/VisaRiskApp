@@ -1,0 +1,6 @@
+**Big text area → DELETE everything → PASTE these 3 lines:**
+streamlit
+pandas
+numpy
+**EXACT FORMAT (spaces/tabs matter!):**
+**No quotes, no imports, no ==version numbers!**
