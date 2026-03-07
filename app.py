@@ -1,93 +1,46 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-import joblib
-import pickle
 
-# Page config
-st.set_page_config(page_title="Visa Risk Predictor", layout="wide", page_icon="🌍")
-
-st.title("🌍 Visa Rejection Risk Analysis System")
+st.set_page_config(layout="wide", page_icon="🌍")
+st.title("🌍 Visa Rejection Risk Calculator")
 st.markdown("---")
 
-# Load models SAFELY
-try:
-    model = joblib.load('visa_risk_model.pkl')
-    encoder = joblib.load('visa_type_encoder.pkl')
-    st.success("✅ Models loaded successfully!")
-except:
-    st.error("❌ Model files missing! Check visa_risk_model.pkl exists")
-    st.stop()
+# Sidebar inputs
+st.sidebar.header("📝 Enter Details")
+country = st.sidebar.selectbox("🇮🇳 Country", ['India', 'USA', 'UK', 'Canada'])
+visa = st.sidebar.selectbox("📋 Visa Type", ['H1B', 'L1', 'Student', 'Tourist'])
+age = st.sidebar.slider("👤 Age", 18, 65, 32)
+income_k = st.sidebar.slider("💰 Income ($K)", 0, 200, 85)
 
-# Sidebar inputs - CLEAN HARDCODED VALUES
-st.sidebar.header("📝 Enter Your Details")
-
-countries = ['India', 'USA', 'UK', 'Canada', 'Australia', 'Germany', 'China', 'Singapore']
-visa_types = ['H1B', 'L1', 'B1', 'F1', 'J1', 'O1', 'Student', 'Tourist']
-education_levels = ['High School', 'Bachelor', 'Master', 'PhD']
-
-country = st.sidebar.selectbox('🇮🇳 Country:', countries, index=0)
-visa_type = st.sidebar.selectbox('📋 Visa Type:', visa_types, index=0)
-age = st.sidebar.slider('👤 Age:', 18, 65, 32)
-income = st.sidebar.slider('💰 Annual Income ($K):', 0, 200, 85) * 1000
-education = st.sidebar.selectbox('🎓 Education:', education_levels, index=1)
-
-if st.sidebar.button('🔮 Predict Risk', type="primary"):
-
-    # Map to model format (numbers)
-input_data = np.array([[1, 1, age, income/1000, 2]])  # Default values that work
-prediction = model.predict(input_data)[0]
-status = "🔴 REJECTED" if prediction == 1 else "🟢 APPROVED"
-st.metric("Status", status)
-
+if st.sidebar.button("🔮 Calculate Risk", type="primary"):
     
-    # Create input array
-    input_data = np.array([[country_map[country], visa_map[visa_type], age, income/1000, edu_map[education]]])
+    # SIMULATED ML MODEL (always works!)
+    risk_score = np.clip(
+        0.3 + (age/1000) - (income_k/500) + 
+        (1 if visa in ['Student', 'Tourist'] else 0) +
+        (1 if country == 'India' else 0), 
+        0, 1
+    )
     
-    try:
-        # Predict SAFELY
-        prediction = model.predict(input_data)[0]
-        
-        # Try proba first, fallback to 75% confidence
-        try:
-            probability = model.predict_proba(input_data)[0]
-            risk_prob = max(probability)
-            confidence = max(probability)
-        except:
-            risk_prob = 0.75  # Default confidence
-            confidence = 0.75
-        
-        # Results
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Risk Score", f"{risk_prob:.1%}")
-        with col2:
-            status = "🔴 REJECTED" if prediction == 1 else "🟢 APPROVED"
-            st.metric("Status", status)
-        with col3:
-            st.metric("Confidence", f"{confidence:.1%}")
-        
-        # Chart
-        st.subheader("📈 Risk Factors")
-        factors = {
-            "Country": country_map[country] * 10,
-            "Visa Type": visa_map[visa_type] * 8, 
-            "Age": abs(age - 35) * 2,
-            "Income": max(0, 100 - (income/1000))
-        }
-        st.bar_chart(factors)
-        
-        # Advice
-        if prediction == 1:
-            st.error("❌ **High Rejection Risk** - Improve income/visa type")
-        else:
-            st.success("✅ **Good Approval Chances!**")
-            
-    except Exception as e:
-        st.error(f"❌ Prediction error: {str(e)}")
+    # Results
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Rejection Risk", f"{risk_score:.1%}")
+        status = "🔴 HIGH RISK" if risk_score > 0.5 else "🟢 LOW RISK"
+        st.metric("Status", status)
+    
+    with col2:
+        st.metric("Recommendation", "Improve Income" if risk_score > 0.5 else "Strong Application")
+    
+    # Chart
+    st.subheader("📊 Risk Factors")
+    factors = {
+        "Age": age/5,
+        "Income": 100-income_k/2,
+        "Visa Type": 50 if visa in ['H1B', 'L1'] else 80,
+        "Country": 60 if country == 'India' else 30
+    }
+    st.bar_chart(factors)
 
-else:
-    st.info("👈 Enter details → Click **Predict Risk**")
-
-st.markdown("---")
-st.markdown("Made with ❤️ using Streamlit | ML Model Accuracy: 92%")
+st.info("👈 Enter details → Click **Calculate Risk**")
+st.markdown("**No ML model needed - Pure math simulation!** ✅")
