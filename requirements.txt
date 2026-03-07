@@ -1,7 +1,2 @@
-**GitHub → https://github.com/sarulega/VisaRiskApp → requirements.txt**
 
-**1. CLICK:** Pencil icon ✏️ (Edit this file)
-**2. SELECT ALL:** Ctrl+A (delete all bad instructions text)  
-**3. BOTTOM:** "Delete this file" button (now appears!)
-**4. "Commit changes" → GREEN BUTTON**
 
