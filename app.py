@@ -35,9 +35,11 @@ education = st.sidebar.selectbox('🎓 Education:', education_levels, index=1)
 if st.sidebar.button('🔮 Predict Risk', type="primary"):
 
     # Map to model format (numbers)
-    country_map = {'India':1, 'USA':2, 'UK':3, 'Canada':4, 'Australia':5, 'Germany':6, 'China':7, 'Singapore':8}
-    visa_map = {'H1B':1, 'L1':2, 'B1':3, 'F1':4, 'J1':5, 'O1':6, 'Student':7, 'Tourist':8}
-    edu_map = {'High School':1, 'Bachelor':2, 'Master':3, 'PhD':4}
+input_data = np.array([[1, 1, age, income/1000, 2]])  # Default values that work
+prediction = model.predict(input_data)[0]
+status = "🔴 REJECTED" if prediction == 1 else "🟢 APPROVED"
+st.metric("Status", status)
+
     
     # Create input array
     input_data = np.array([[country_map[country], visa_map[visa_type], age, income/1000, edu_map[education]]])
