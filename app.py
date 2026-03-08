@@ -1,177 +1,310 @@
 import streamlit as st
 
-# CUSTOM LOGO + CSS
-st.set_page_config(
-    page_title="Visa Risk Analyzer", 
-    page_icon="🌍",
-    layout="wide"
-)
+# Page config + Custom styling
+st.set_page_config(page_title="Visa Application Portal", page_icon="🛂", layout="wide")
 
-# CUSTOM CSS + LOGO
+# Custom CSS
 st.markdown("""
 <style>
-.logo {
-    text-align: center;
-    padding: 2rem;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+.main-header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    padding: 3rem;
     border-radius: 20px;
     color: white;
+    text-align: center;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
 }
-.logo h1 {
-    font-size: 3rem;
-    margin: 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-.logo p {
-    font-size: 1.2rem;
-    opacity: 0.9;
-}
-.metric-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1.5rem;
+.page-card {
+    background: white;
+    padding: 2.5rem;
     border-radius: 15px;
-    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-left: 5px solid #1e3c72;
+}
+.progress-bar {
+    background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+    height: 8px;
+    border-radius: 10px;
+    margin: 2rem 0;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# UNIQUE LOGO SECTION
+# Session state for multi-page
+if 'page' not in st.session_state:
+    st.session_state.page = 0
+if 'form_data' not in st.session_state:
+    st.session_state.form_data = {}
+
+# HEADER
 st.markdown("""
-<div class="logo">
-    <h1>🌍 VisaRisk AI</h1>
-    <p>Advanced Visa Approval Predictor | Powered by Machine Learning</p>
+<div class="main-header">
+    <h1>🛂 Complete Visa Application Portal</h1>
+    <p>Professional 8-Step Process | Document Checklist | Success Prediction</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("---")
+# PROGRESS BAR
+progress = st.progress(st.session_state.page / 8)
+st.markdown(f"""
+<div class="progress-bar" style="width: {(st.session_state.page/8)*100}%"></div>
+""", unsafe_allow_html=True)
 
-# DETAILED FORM - PROFESSIONAL LAYOUT
-col1, col2 = st.columns([1,1])
+# PAGES
+pages = [
+    "Personal Details", "Passport Details", "Educational Details", 
+    "University Details", "Financial Proof", "Application Form", 
+    "Medical & PCC", "Results & Suggestions"
+]
 
-with col1:
-    st.subheader("👤 Personal Details")
+st.subheader(f"📋 Step {st.session_state.page + 1}/8: {pages[st.session_state.page]}")
+
+# === PAGE 1: PERSONAL DETAILS ===
+if st.session_state.page == 0:
+    st.markdown('<div class="page-card">', unsafe_allow_html=True)
+    st.info("**You must provide basic personal information exactly as in passport.**")
     
-    with st.form("personal_form"):
-        col_a, col_b = st.columns(2)
-        with col_a:
-            full_name = st.text_input("Full Name")
-            nationality = st.selectbox("Nationality", 
-                ["India", "USA", "UK", "Canada", "Australia", "Germany", "Singapore", "Other"])
-        with col_b:
-            age = st.slider("Age", 18, 70, 28)
-            marital_status = st.selectbox("Marital Status", 
+    with st.form("personal"):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.session_state.form_data['full_name'] = st.text_input("👤 Full Name (as in passport)*")
+            st.session_state.form_data['dob'] = st.date_input("📅 Date of Birth*")
+            st.session_state.form_data['gender'] = st.selectbox("Gender*", ["Male", "Female", "Other"])
+        with col2:
+            st.session_state.form_data['nationality'] = st.selectbox("🏳️ Nationality*", 
+                ["India", "USA", "UK", "Canada", "Australia", "Germany", "Singapore"])
+            st.session_state.form_data['marital_status'] = st.selectbox("💍 Marital Status*", 
                 ["Single", "Married", "Divorced", "Widowed"])
+            st.session_state.form_data['phone'] = st.text_input("📞 Phone Number*")
         
-        current_occupation = st.selectbox("Occupation", 
-            ["Student", "Software Engineer", "Manager", "Doctor", "Business Owner", "Unemployed", "Other"])
+        st.session_state.form_data['email'] = st.text_input("📧 Email ID*")
+        st.session_state.form_data['address'] = st.text_area("🏠 Current Address*")
         
-        submitted_personal = st.form_submit_button("Next →", use_container_width=True)
+        if st.form_submit_button("✅ Next - Passport Details", use_container_width=True):
+            if all([st.session_state.form_data.get(k) for k in ['full_name', 'dob', 'nationality', 'phone', 'email']]):
+                st.session_state.page = 1
+                st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
-with col2:
-    st.subheader("💼 Application Details")
+# === PAGE 2: PASSPORT ===
+elif st.session_state.page == 1:
+    st.markdown('<div class="page-card">', unsafe_allow_html=True)
+    st.warning("**Passport must have 6+ months validity from travel date**")
+    
+    with st.form("passport"):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.session_state.form_data['passport_num'] = st.text_input("🛂 Passport Number*")
+            st.session_state.form_data['passport_issue'] = st.date_input("📅 Issue Date*")
+            st.session_state.form_data['passport_expiry'] = st.date_input("📅 Expiry Date*")
+        with col2:
+            st.session_state.form_data['photo_ready'] = st.checkbox("✅ Passport photos ready (2x2 inch, white bg)")
+        
+        if st.form_submit_button("✅ Next - Education", use_container_width=True):
+            st.session_state.page = 2
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# === PAGE 3: EDUCATION ===
+elif st.session_state.page == 2:
+    st.markdown('<div class="page-card">', unsafe_allow_html=True)
+    st.info("**Required for student visas**")
+    
+    with st.form("education"):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.session_state.form_data['tenth_percent'] = st.slider("10th %", 0, 100, 85)
+            st.session_state.form_data['twelfth_percent'] = st.slider("12th %", 0, 100, 88)
+        with col2:
+            st.session_state.form_data['ug_degree'] = st.selectbox("UG Degree*", 
+                ["B.Tech", "B.Sc", "B.Com", "BA", "Other"])
+            st.session_state.form_data['ug_percent'] = st.slider("UG %", 0, 100, 78)
+        
+        st.session_state.form_data['english_test'] = st.selectbox("English Test*", 
+            ["IELTS (6.5+)", "TOEFL (80+)", "PTE (58+)", "None"])
+        
+        if st.form_submit_button("✅ Next - University", use_container_width=True):
+            st.session_state.page = 3
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# === PAGE 4: UNIVERSITY ===
+elif st.session_state.page == 3:
+    st.markdown('<div class="page-card">', unsafe_allow_html=True)
+    st.warning("**Must have OFFICIAL offer letter**")
+    
+    with st.form("university"):
+        st.session_state.form_data['university'] = st.selectbox("🎓 University Country*", 
+            ["Canada", "UK", "USA", "Australia", "Germany", "Ireland"])
+        st.session_state.form_data['course'] = st.text_input("Course Name*")
+        st.session_state.form_data['duration'] = st.slider("Course Duration (years)", 1, 5, 2)
+        st.session_state.form_data['offer_letter'] = st.checkbox("✅ Official offer letter received*")
+        
+        if st.form_submit_button("✅ Next - Finances", use_container_width=True):
+            st.session_state.page = 4
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# === PAGE 5: FINANCE ===
+elif st.session_state.page == 4:
+    st.markdown('<div class="page-card">', unsafe_allow_html=True)
+    st.info("**Show 6 months bank statements**")
+    
+    with st.form("finance"):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.session_state.form_data['annual_income'] = st.number_input("Sponsor Annual Income (₹Lakhs)*", 
+                min_value=0.0, max_value=100.0, value=10.0, step=1.0)
+            st.session_state.form_data['bank_balance'] = st.number_input("Bank Balance (₹Lakhs)*", 
+                min_value=0.0, max_value=50.0, value=15.0, step=1.0)
+        with col2:
+            st.session_state.form_data['sponsor_relation'] = st.selectbox("Sponsor Relation*", 
+                ["Self", "Father", "Mother", "Brother", "Other"])
+            st.session_state.form_data['loan_approved'] = st.checkbox("✅ Education loan approved")
+        
+        if st.form_submit_button("✅ Next - Application", use_container_width=True):
+            st.session_state.page = 5
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# === PAGE 6: APPLICATION FORM ===
+elif st.session_state.page == 5:
+    st.markdown('<div class="page-card">', unsafe_allow_html=True)
     
     with st.form("app_form"):
-        col_c, col_d = st.columns(2)
-        with col_c:
-            visa_type = st.selectbox("Visa Type", 
-                ["F1 Student", "H1B Work", "L1 Transfer", "B1/B2 Tourist", "J1 Exchange"])
-            purpose = st.selectbox("Travel Purpose", 
-                ["Study", "Work", "Tourism", "Business", "Conference", "Family Visit"])
-        with col_d:
-            annual_income = st.number_input("Annual Income (USD)", 
-                min_value=0, max_value=500000, value=50000, step=5000)
-            travel_duration = st.slider("Stay Duration (months)", 1, 60, 6)
+        st.session_state.form_data['travel_purpose'] = st.selectbox("Travel Purpose*", 
+            ["Study", "Work", "Tourism", "Conference"])
+        st.session_state.form_data['return_intent'] = st.selectbox("Post-study plan*", 
+            ["Return home", "Work abroad", "Further studies"])
         
-        submitted_app = st.form_submit_button("Calculate Risk", use_container_width=True)
+        if st.form_submit_button("✅ Next - Medical", use_container_width=True):
+            st.session_state.page = 6
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# RESULTS SECTION
-if 'risk_calculated' not in st.session_state:
-    st.session_state.risk_calculated = False
+# === PAGE 7: MEDICAL & PCC ===
+elif st.session_state.page == 6:
+    st.markdown('<div class="page-card">', unsafe_allow_html=True)
+    st.warning("**Medical from approved panel**")
+    
+    with st.form("medical"):
+        st.session_state.form_data['medical_done'] = st.checkbox("✅ Medical test scheduled")
+        st.session_state.form_data['pcc_ready'] = st.checkbox("✅ Police Clearance Certificate ready")
+        st.session_state.form_data['fees_paid'] = st.checkbox("✅ Visa fees paid")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("← Previous", use_container_width=True):
+                st.session_state.page = 5
+                st.rerun()
+        with col2:
+            if st.button("🎯 Get Results", use_container_width=True):
+                st.session_state.page = 7
+                st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
-if submitted_personal or submitted_app:
-    st.session_state.risk_calculated = True
-
-if st.session_state.risk_calculated:
-    st.markdown("---")
+# === PAGE 8: RESULTS ===
+elif st.session_state.page == 7:
+    st.markdown('<div class="page-card">', unsafe_allow_html=True)
+    st.header("🎯 Visa Success Prediction")
     
-    # RISK CALCULATION (Advanced formula)
-    risk_score = 25  # base
+    # COMPLEX RISK CALCULATION
+    risk_score = 20
     
-    # Personal factors
-    if age < 25 or age > 55: risk_score += 15
-    if annual_income < 30000: risk_score += 25
-    elif annual_income < 60000: risk_score += 10
+    # Academic strength
+    academic_score = (st.session_state.form_data.get('tenth_percent', 0) + 
+                     st.session_state.form_data.get('twelfth_percent', 0) + 
+                     st.session_state.form_data.get('ug_percent', 0)) / 3
+    if academic_score > 85: risk_score -= 15
+    elif academic_score > 70: risk_score -= 5
     
-    # Visa factors  
-    if visa_type in ["B1/B2 Tourist"]: risk_score += 20
-    elif visa_type == "F1 Student": risk_score += 10
-    else: risk_score -= 5  # Work visas better
+    # Financial strength  
+    finance_score = st.session_state.form_data.get('bank_balance', 0) + st.session_state.form_data.get('annual_income', 0)
+    if finance_score > 25: risk_score -= 20
+    elif finance_score > 15: risk_score -= 10
     
-    # Country factors
-    if nationality == "India": risk_score += 8
-    elif nationality in ["USA", "UK", "Canada"]: risk_score -= 10
+    # Other factors
+    if st.session_state.form_data.get('passport_expiry'):
+        months_left = (st.session_state.form_data['passport_expiry'] - st.session_state.form_data['passport_issue']).days / 30
+        if months_left < 6: risk_score += 25
     
-    # Clamp 0-100
     risk_score = max(0, min(100, risk_score))
     
-    # RESULTS CARDS
-    col1, col2, col3 = st.columns(3)
+    # DISPLAY RESULTS
+    col1, col2, col3 = st.columns([2, 1, 1])
     
     with col1:
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.metric("🎯 Rejection Risk", f"{risk_score:.0f}%")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.metric("📊 Rejection Risk", f"{risk_score:.0f}%", delta=None)
     
     with col2:
-        color = "🔴" if risk_score > 60 else "🟡" if risk_score > 40 else "🟢"
-        status = "HIGH" if risk_score > 60 else "MEDIUM" if risk_score > 40 else "LOW"
-        st.markdown(f'<div class="metric-card"><h3>{color} {status}</h3></div>', unsafe_allow_html=True)
+        if risk_score < 30:
+            st.success("✅ **HIGH SUCCESS** - Excellent profile!")
+        elif risk_score < 60:
+            st.warning("⚠️ **MODERATE** - Some improvements needed")
+        else:
+            st.error("🚨 **HIGH RISK** - Urgent improvements required")
     
     with col3:
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.metric("✅ Success Rate", f"{100-risk_score:.0f}%")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.metric("🎯 Success Chance", f"{100-risk_score:.0f}%")
     
-    # RISK BREAKDOWN CHART
-    st.subheader("📊 Risk Factors Breakdown")
-    factors = {
-        "Age": min(25, abs(age-30)*1.5),
-        "Income": max(0, (60000-annual_income)/1000),
-        "Visa Type": 30 if visa_type == "B1/B2 Tourist" else 15,
-        "Nationality": 20 if nationality == "India" else 5
+    # DETAILED CHECKLIST
+    st.subheader("✅ Document Readiness")
+    
+    checklist = {
+        "Passport (6+ months valid)": st.session_state.form_data.get('passport_expiry'),
+        "10th/12th/UG marksheets": academic_score > 0,
+        "University offer letter": st.session_state.form_data.get('university'),
+        "6 months bank statements": st.session_state.form_data.get('bank_balance'),
+        "Sponsor documents": st.session_state.form_data.get('sponsor_relation'),
+        "English test score": st.session_state.form_data.get('english_test'),
+        "Medical test booked": st.session_state.form_data.get('medical_done'),
+        "PCC ready": st.session_state.form_data.get('pcc_ready')
     }
-    st.bar_chart(factors)
     
-    # DETAILED RECOMMENDATIONS
-    st.subheader("💡 Personalized Recommendations")
+    st.dataframe(pd.DataFrame(list(checklist.items()), columns=['Document', 'Status']), use_container_width=True)
     
-    rec_col1, rec_col2 = st.columns(2)
+    # PERSONALIZED RECOMMENDATIONS
+    st.subheader("🎯 Action Plan")
     
-    with rec_col1:
-        if risk_score > 60:
-            st.error("🚨 HIGH RISK - Action Required:")
-            st.write("• 💰 Increase sponsor income")
-            st.write("• 📜 Stronger invitation letter") 
-            st.write("• 🏦 Higher bank balance")
-        elif risk_score > 40:
-            st.warning("⚠️ MEDIUM RISK - Improve:")
-            st.write("• 💼 Better job title")
-            st.write("• 🎓 Higher education")
+    if risk_score > 60:
+        st.error("**IMMEDIATE ACTIONS:**")
+        st.write("• 💰 Show ₹25+ lakhs bank balance")
+        st.write("• 📜 Get loan approval letter") 
+        st.write("• 🩺 Complete medical test")
+    else:
+        st.success("**FINAL PREP:**")
+        st.write("• 📋 Double-check all documents")
+        st.write("• 💳 Pay visa fees online")
+        st.write("• 🛫 Book appointment slot")
     
-    with rec_col2:
-        if risk_score <= 40:
-            st.success("✅ LOW RISK - Strong Profile:")
-            st.write("• Stable income")
-            st.write("• Good visa type")
-            st.write("• Favorable age")
+    # NAVIGATION
+    col1, col2 = st.columns(2)
+    col1.button("← Edit Details", on_click=lambda: setattr(st.session_state, 'page', 0))
+    if st.button("🔄 New Application", type="secondary"):
+        for key in list(st.session_state.form_data.keys()):
+            del st.session_state.form_data[key]
+        st.session_state.page = 0
+        st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# FOOTER
+# NAVIGATION (Bottom)
+if st.session_state.page > 0:
+    if st.button("← Previous Step", key="prev"):
+        st.session_state.page -= 1
+        st.rerun()
+
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; color: #666; padding: 2rem;'>
-    <h3>🌟 VisaRisk AI - Professional Visa Success Predictor</h3>
-    <p>Demo version | For portfolio showcase | Accuracy: 92% on test data</p>
+<div style='text-align: center; color: #666; padding: 1rem; font-size: 0.9rem;'>
+    Visa Application Portal | Demo Version | For Educational Purpose
 </div>
 """, unsafe_allow_html=True)
