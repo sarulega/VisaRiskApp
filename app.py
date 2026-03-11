@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import datetime
 
 # Page config 
 st.set_page_config(
@@ -74,12 +75,12 @@ if st.session_state.page == 0:
     with col1:
         st.session_state.form_data['full_name'] = st.text_input("👤 Full Name (as in passport)*")
         
-        # FIXED DOB - Shows 2000-2026 in calendar!
+        # ✅ FIXED DOB - Calendar shows 2000-2026!
         st.session_state.form_data['dob'] = st.date_input(
             "📅 Date of Birth*", 
             min_value=datetime.date(2000, 1, 1),
             max_value=datetime.date(2026, 12, 31),
-            value=datetime.date(2005, 6, 15)  # Defaults to age ~21
+            value=datetime.date(2005, 6, 15)  # Age 21 default
         )
         
         st.session_state.form_data['gender'] = st.selectbox("♂️ Gender*", ["Male", "Female", "Other"])
