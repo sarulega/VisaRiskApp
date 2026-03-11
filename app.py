@@ -73,8 +73,17 @@ if st.session_state.page == 0:
     col1, col2 = st.columns(2)
     with col1:
         st.session_state.form_data['full_name'] = st.text_input("👤 Full Name (as in passport)*")
-        st.session_state.form_data['dob'] = st.date_input("📅 Date of Birth*")
+        
+        # FIXED DOB - Shows 2000-2026 in calendar!
+        st.session_state.form_data['dob'] = st.date_input(
+            "📅 Date of Birth*", 
+            min_value=datetime.date(2000, 1, 1),
+            max_value=datetime.date(2026, 12, 31),
+            value=datetime.date(2005, 6, 15)  # Defaults to age ~21
+        )
+        
         st.session_state.form_data['gender'] = st.selectbox("♂️ Gender*", ["Male", "Female", "Other"])
+    
     with col2:
         st.session_state.form_data['nationality'] = st.selectbox("🏳️ Nationality*", 
             ["India", "USA", "UK", "Canada", "Australia", "Germany", "Singapore"])
@@ -90,6 +99,7 @@ if st.session_state.page == 0:
     col2.button("🔄 Reset", on_click=lambda: (setattr(st.session_state, 'page', 0), setattr(st.session_state, 'form_data', {})))
     
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 # === PAGE 2: PASSPORT ===
 elif st.session_state.page == 1:
